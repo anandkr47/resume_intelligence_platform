@@ -1,0 +1,31 @@
+{
+  "name": "@resume-platform/matcher-worker",
+  "version": "1.0.0",
+  "description": "Role matching worker",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@resume-platform/config": "*",
+    "@resume-platform/logger": "*",
+    "@resume-platform/queue-lib": "*",
+    "@resume-platform/role-matching": "*",
+    "@resume-platform/resume-nlp": "*",
+    "bullmq": "^5.1.0",
+    "ioredis": "^5.3.2",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.2"
+  }
+}

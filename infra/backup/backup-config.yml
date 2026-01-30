@@ -1,0 +1,73 @@
+# Backup configuration for Resume Intelligence Platform
+
+# Database backup configuration
+database:
+  postgres:
+    enabled: true
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    retention_days: 30
+    format: "custom"  # custom, plain, tar, directory
+    compression: true
+    backup_path: "/backups/postgres"
+    # Tables to backup (empty = all)
+    tables: []
+    # Exclude tables
+    exclude_tables: []
+
+# File storage backup
+storage:
+  uploads:
+    enabled: true
+    schedule: "0 3 * * *"  # Daily at 3 AM
+    retention_days: 90
+    source_path: "/app/uploads"
+    backup_path: "/backups/uploads"
+    compression: true
+
+  exports:
+    enabled: true
+    schedule: "0 4 * * *"  # Daily at 4 AM
+    retention_days: 30
+    source_path: "/app/exports"
+    backup_path: "/backups/exports"
+    compression: true
+
+# Redis backup (RDB snapshots)
+redis:
+  enabled: true
+  schedule: "0 */6 * * *"  # Every 6 hours
+  retention_days: 7
+  backup_path: "/backups/redis"
+
+# Backup storage destinations
+destinations:
+  local:
+    enabled: true
+    path: "/backups"
+
+  s3:
+    enabled: false
+    bucket: "resume-platform-backups"
+    region: "us-east-1"
+    path: "backups/{{ date }}"
+    # AWS credentials from environment
+
+  gcs:
+    enabled: false
+    bucket: "resume-platform-backups"
+    path: "backups/{{ date }}"
+    # GCS credentials from environment
+
+# Notification settings
+notifications:
+  email:
+    enabled: false
+    on_success: false
+    on_failure: true
+    recipients: []
+
+  slack:
+    enabled: false
+    webhook_url: ""
+    on_success: false
+    on_failure: true

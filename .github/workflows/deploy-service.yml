@@ -1,0 +1,68 @@
+name: Deploy Microservice
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service name to deploy'
+        required: true
+        type: choice
+        options:
+          - api-gateway-node
+          - analytics-api-node
+          - upload-service-node
+          - export-worker-node
+          - matcher-worker-node
+          - frontend-dashboard
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      tag:
+        description: 'Docker image tag'
+        required: false
+        default: 'latest'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/${{ github.event.inputs.service }}/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ github.event.inputs.service }}:${{ github.event.inputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to Kubernetes
+        if: github.event.inputs.environment == 'production'
+        run: |
+          echo "Deploying ${{ github.event.inputs.service }} to Kubernetes"
+          # Add your Kubernetes deployment commands here
+          # kubectl set image deployment/${{ github.event.inputs.service }} \
+          #   ${{ github.event.inputs.service }}=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ github.event.inputs.service }}:${{ github.event.inputs.tag }}

@@ -1,0 +1,38 @@
+# Ansible inventory file
+# Usage: ansible-playbook -i inventory.yml playbook.yml
+
+all:
+  children:
+    production:
+      hosts:
+        prod-server-1:
+          ansible_host: 192.168.1.10
+          ansible_user: deploy
+        prod-server-2:
+          ansible_host: 192.168.1.11
+          ansible_user: deploy
+      vars:
+        environment: production
+        domain: resume-platform.example.com
+
+    staging:
+      hosts:
+        staging-server:
+          ansible_host: 192.168.1.20
+          ansible_user: deploy
+      vars:
+        environment: staging
+        domain: staging.resume-platform.example.com
+
+    development:
+      hosts:
+        dev-server:
+          ansible_host: 192.168.1.30
+          ansible_user: deploy
+      vars:
+        environment: development
+        domain: dev.resume-platform.example.com
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

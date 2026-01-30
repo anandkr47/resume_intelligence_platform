@@ -1,0 +1,94 @@
+---
+# Ansible playbook for Resume Intelligence Platform infrastructure
+# Usage: ansible-playbook -i inventory playbook.yml
+
+- name: Deploy Resume Intelligence Platform
+  hosts: all
+  become: yes
+  vars:
+    app_user: resume-platform
+    app_dir: /opt/resume-platform
+    docker_compose_version: "2.24.0"
+    
+  tasks:
+    - name: Update system packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - python3-pip
+          - git
+          - curl
+          - wget
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Docker Compose plugin
+      shell: |
+        mkdir -p ~/.docker/cli-plugins/
+        curl -SL "https://github.com/docker/compose/releases/download/v{{ docker_compose_version }}/docker-compose-linux-x86_64" -o ~/.docker/cli-plugins/docker-compose
+        chmod +x ~/.docker/cli-plugins/docker-compose
+      become_user: root
+
+    - name: Add user to docker group
+      user:
+        name: "{{ app_user }}"
+        groups: docker
+        append: yes
+
+    - name: Create application directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
+
+    - name: Create backup directory
+      file:
+        path: /backups
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
+
+    - name: Create log directory
+      file:
+        path: /var/log/resume-platform
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
+
+    - name: Copy docker-compose file
+      template:
+        src: docker-compose.prod.yml.j2
+        dest: "{{ app_dir }}/docker-compose.yml"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+
+    - name: Copy environment file
+      template:
+        src: .env.j2
+        dest: "{{ app_dir }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0600'
+
+    - name: Start services
+      docker_compose:
+        project_src: "{{ app_dir }}"
+        state: present
+      become_user: "{{ app_user }}"
+
+    - name: Setup log rotation
+      template:
+        src: logrotate.j2
+        dest: /etc/logrotate.d/resume-platform
+      become: yes

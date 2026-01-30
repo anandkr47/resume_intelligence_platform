@@ -1,0 +1,86 @@
+# Prometheus configuration for monitoring microservices
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'resume-platform'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api-gateway-node:3000']
+        labels:
+          service: 'api-gateway'
+          type: 'api'
+
+  # Analytics API
+  - job_name: 'analytics-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['analytics-api-node:3002']
+        labels:
+          service: 'analytics-api'
+          type: 'api'
+
+  # Upload Service
+  - job_name: 'upload-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['upload-service-node:3001']
+        labels:
+          service: 'upload-service'
+          type: 'api'
+
+  # Node.js Workers
+  - job_name: 'node-workers'
+    static_configs:
+      - targets:
+          - 'matcher-worker-node:9090'
+          - 'export-worker-node:9090'
+        labels:
+          type: 'worker'
+          runtime: 'nodejs'
+
+  # PostgreSQL Exporter
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+          type: 'database'
+
+  # Redis Exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          type: 'cache'
+
+  # Node Exporter (system metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          type: 'system'

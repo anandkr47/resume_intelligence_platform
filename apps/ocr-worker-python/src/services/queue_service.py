@@ -1,0 +1,164 @@
+"""Queue service for Python workers using Redis"""
+import redis
+import json
+import time
+import signal
+import sys
+from typing import Callable, Dict, Any, Optional
+from services.logger import get_logger
+
+logger = get_logger(__name__)
+
+class QueueService:
+    """Service for consuming jobs from Redis queue"""
+    
+    def __init__(
+        self,
+        queue_name: str,
+        redis_host: str = 'redis',
+        redis_port: int = 6379,
+        redis_password: Optional[str] = None,
+        processor: Optional[Callable] = None,
+        concurrency: int = 1
+    ):
+        self.queue_name = queue_name
+        self.processor = processor
+        self.concurrency = concurrency
+        self.running = False
+        
+        # Redis connection
+        self.redis_client = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            password=redis_password,
+            decode_responses=True,
+            socket_connect_timeout=5,
+            socket_timeout=5,
+            retry_on_timeout=True
+        )
+        
+        # Register signal handlers for graceful shutdown
+        signal.signal(signal.SIGTERM, self._signal_handler)
+        signal.signal(signal.SIGINT, self._signal_handler)
+    
+    def _signal_handler(self, signum, frame):
+        """Handle shutdown signals"""
+        logger.info(f"Received signal {signum}, shutting down gracefully...")
+        self.running = False
+        sys.exit(0)
+    
+    def _process_job(self, job_data: Dict[str, Any]) -> Any:
+        """Process a single job"""
+        if not self.processor:
+            raise ValueError("No processor function provided")
+        
+        try:
+            result = self.processor(job_data)
+            return result
+        except Exception as e:
+            logger.error(f"Job processing failed", {
+                "error": str(e),
+                "job_data": job_data
+            })
+            raise
+    
+    def _consume_job(self) -> bool:
+        """Consume a single job from the queue"""
+        try:
+            # Blocking pop from queue (BLPOP with 1 second timeout)
+            result = self.redis_client.blpop(self.queue_name, timeout=1)
+            
+            if result is None:
+                return True  # Timeout, continue running
+            
+            _, job_json = result
+            job_data = json.loads(job_json)
+            
+            logger.info(f"Processing job from {self.queue_name}", {
+                "queue": self.queue_name,
+                "job_id": job_data.get('resumeId', 'unknown')
+            })
+            
+            start_time = time.time()
+            try:
+                result = self._process_job(job_data)
+                duration = time.time() - start_time
+                
+                logger.info(f"Job completed successfully", {
+                    "queue": self.queue_name,
+                    "job_id": job_data.get('resumeId', 'unknown'),
+                    "duration": f"{duration:.2f}s"
+                })
+                
+                # Optionally publish result to result queue
+                result_queue = f"{self.queue_name}:results"
+                self.redis_client.rpush(result_queue, json.dumps({
+                    "job": job_data,
+                    "result": result,
+                    "status": "completed"
+                }))
+                
+            except Exception as e:
+                duration = time.time() - start_time
+                logger.error(f"Job failed", {
+                    "queue": self.queue_name,
+                    "job_id": job_data.get('resumeId', 'unknown'),
+                    "duration": f"{duration:.2f}s",
+                    "error": str(e)
+                })
+                
+                # Publish to failed queue
+                failed_queue = f"{self.queue_name}:failed"
+                self.redis_client.rpush(failed_queue, json.dumps({
+                    "job": job_data,
+                    "error": str(e),
+                    "status": "failed"
+                }))
+            
+            return True
+            
+        except redis.ConnectionError as e:
+            logger.error(f"Redis connection error: {e}")
+            time.sleep(5)  # Wait before retrying
+            return True
+        except Exception as e:
+            logger.error(f"Unexpected error in queue consumption: {e}")
+            time.sleep(1)
+            return True
+    
+    def start(self):
+        """Start consuming jobs from the queue"""
+        logger.info(f"Starting queue service for {self.queue_name}", {
+            "queue": self.queue_name,
+            "concurrency": self.concurrency
+        })
+        
+        # Test Redis connection
+        try:
+            self.redis_client.ping()
+            logger.info("Redis connection established")
+        except Exception as e:
+            logger.error(f"Failed to connect to Redis: {e}")
+            raise
+        
+        self.running = True
+        
+        # Simple single-threaded consumer (can be extended for concurrency)
+        while self.running:
+            try:
+                self._consume_job()
+            except KeyboardInterrupt:
+                logger.info("Keyboard interrupt received")
+                break
+            except Exception as e:
+                logger.error(f"Error in main loop: {e}")
+                if not self.running:
+                    break
+                time.sleep(1)
+    
+    def stop(self):
+        """Stop consuming jobs"""
+        logger.info(f"Stopping queue service for {self.queue_name}")
+        self.running = False
+        if self.redis_client:
+            self.redis_client.close()

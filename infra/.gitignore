@@ -1,0 +1,33 @@
+# SSL Certificates (never commit private keys)
+ssl/dev/*.pem
+ssl/dev/*.key
+ssl/prod/*.pem
+ssl/prod/*.key
+*.pem
+*.key
+*.crt
+*.csr
+
+# Terraform state files
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+
+# Backup files
+backup/*.dump
+backup/*.rdb
+backup/*.gz
+backup/*.zip
+
+# Ansible
+ansible/.vault_pass
+ansible/group_vars/*/vault.yml
+
+# Environment files
+.env
+.env.local
+*.env
+
+# Logs
+*.log

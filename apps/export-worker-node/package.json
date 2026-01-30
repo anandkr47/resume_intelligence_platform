@@ -1,0 +1,28 @@
+{
+  "name": "@resume-platform/export-worker",
+  "version": "1.0.0",
+  "description": "CSV export worker",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "csv-writer": "^1.6.0",
+    "@resume-platform/config": "*",
+    "@resume-platform/logger": "*",
+    "@resume-platform/queue-lib": "*",
+    "bullmq": "^5.1.0",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.2"
+  }
+}

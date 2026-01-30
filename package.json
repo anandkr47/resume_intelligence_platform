@@ -1,0 +1,49 @@
+{
+  "name": "resume-intelligence-platform",
+  "version": "1.0.0",
+  "description": "Resume Intelligence Platform - Automated resume parsing and analytics",
+  "private": true,
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "build": "turbo run build",
+    "build:service": "./scripts/build-service.sh",
+    "build:all": "./scripts/build-all-services.sh",
+    "push:all": "./scripts/push-all-services.sh",
+    "deploy:service": "./scripts/deploy-service.sh",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "docker:dev": "docker-compose -f deployments/docker-compose/docker-compose.dev.yml up",
+    "docker:prod": "docker-compose -f deployments/docker-compose/docker-compose.prod.yml up",
+    "docker:microservices": "docker-compose -f deployments/docker-compose/docker-compose.microservices.yml up -d",
+    "docker:start": "./scripts/start-all-services.sh",
+    "docker:start:build": "./scripts/start-all-services.sh --build",
+    "docker:start:full": "./scripts/start-all-services.sh --build --infra",
+    "docker:down": "docker-compose -f deployments/docker-compose/docker-compose.microservices.yml down",
+    "docker:logs": "docker-compose -f deployments/docker-compose/docker-compose.microservices.yml logs -f",
+    "docker:ps": "docker-compose -f deployments/docker-compose/docker-compose.microservices.yml ps",
+    "seed:jobs": "bash scripts/seed-jobs.sh",
+    "swarm:deploy": "./scripts/deploy-swarm.sh",
+    "swarm:stop": "bash scripts/stop-swarm.sh",
+    "swarm:init": "docker swarm init",
+    "load-test": "k6 run load-testing/k6/upload.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.1.0",
+    "turbo": "^1.11.2",
+    "typescript": "^5.3.2",
+    "typescript-eslint": "^8.53.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
