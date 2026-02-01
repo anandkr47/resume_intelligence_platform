@@ -39,3 +39,4 @@ docker stack deploy -c deployments/swarm/stack.yml resume-platform
 
 echo "Deployment complete!"
 echo "Check status with: docker stack services resume-platform"
+echo "Scale upload pool after load test: ./scripts/scale-upload.sh <replicas>"

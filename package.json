@@ -30,7 +30,9 @@
     "swarm:deploy": "./scripts/deploy-swarm.sh",
     "swarm:stop": "bash scripts/stop-swarm.sh",
     "swarm:init": "docker swarm init",
-    "load-test": "k6 run load-testing/k6/upload.test.js"
+    "load-test": "./scripts/run-k6.sh load-testing/k6/upload.test.js",
+    "load-test:capacity": "./scripts/run-k6.sh load-testing/k6/upload-capacity.test.js",
+    "load-test:batch": "./scripts/run-k6.sh load-testing/k6/upload-batch.test.js"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

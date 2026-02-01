@@ -31,13 +31,22 @@ export function buildFindAllResumesQuery(
     paramIndex++;
   }
 
-  if (filters.minScore != null && filters.minScore !== undefined && filters.roleId) {
-    query += ` AND id IN (
-      SELECT resume_id FROM resume_matches 
-      WHERE role_id = $${paramIndex} AND match_score >= $${paramIndex + 1}
-    )`;
-    values.push(filters.roleId, filters.minScore);
-    paramIndex += 2;
+  if (filters.minScore != null && filters.minScore !== undefined && filters.minScore > 0) {
+    if (filters.roleId) {
+      query += ` AND id IN (
+        SELECT resume_id FROM resume_matches 
+        WHERE role_id = $${paramIndex} AND match_score >= $${paramIndex + 1}
+      )`;
+      values.push(filters.roleId, filters.minScore);
+      paramIndex += 2;
+    } else {
+      query += ` AND id IN (
+        SELECT resume_id FROM resume_matches 
+        WHERE match_score >= $${paramIndex}
+      )`;
+      values.push(filters.minScore);
+      paramIndex += 1;
+    }
   }
 
   query += ` ORDER BY created_at DESC LIMIT $${paramIndex}`;

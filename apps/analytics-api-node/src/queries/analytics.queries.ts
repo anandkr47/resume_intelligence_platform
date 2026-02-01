@@ -45,14 +45,14 @@ export const GET_EXPERIENCE_STATS = `
 
 export const GET_EDUCATION_STATS = `
   SELECT 
-    edu_item->>'institution' as institution,
+    COALESCE(edu_item->>'institution', edu_item->>'school') as institution,
     COUNT(*) as count
   FROM resumes,
   jsonb_array_elements(education) as edu_item
   WHERE education IS NOT NULL 
     AND jsonb_typeof(education) = 'array'
-    AND edu_item->>'institution' IS NOT NULL
-  GROUP BY edu_item->>'institution'
+    AND (edu_item->>'institution' IS NOT NULL OR edu_item->>'school' IS NOT NULL)
+  GROUP BY COALESCE(edu_item->>'institution', edu_item->>'school')
   ORDER BY count DESC
   LIMIT $1
 `;

@@ -7,7 +7,7 @@ export const gatewayRoutes: Record<string, GatewayRouteConfig> = {
     upstream: config.uploadService.url,
     prefix: '/api/upload',
     rewritePrefix: '/api/v1/upload',
-    timeout: 30000, // 30 seconds for file uploads
+    timeout: 60000, // 60s for batch uploads; scale upload-service replicas for capacity
   },
   analytics: {
     upstream: config.analyticsApi.url,

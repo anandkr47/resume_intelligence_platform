@@ -1,5 +1,9 @@
+# Upload load test via API gateway. Use results to size upload-service replicas.
+# Run: artillery run load-testing/artillery/upload.yml
+# With custom target: artillery run --target http://localhost:3000 load-testing/artillery/upload.yml
 config:
-  target: 'http://localhost:3000'
+  target: "http://localhost:3000"
+  processor: "./processor.js"
   phases:
     - duration: 60
       arrivalRate: 5
@@ -10,10 +14,12 @@ config:
     - duration: 60
       arrivalRate: 20
       name: "Spike test"
-  processor: "./processor.js"
+  ensure:
+    maxErrorRate: 0.1
+    p95: 5000
 
 scenarios:
-  - name: "Upload resumes"
+  - name: "Upload single resume"
     flow:
       - post:
           url: "/api/upload/single"
