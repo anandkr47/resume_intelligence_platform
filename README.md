@@ -11,7 +11,15 @@ An automated, scalable resume parsing and analytics platform that processes resu
 - **Analytics dashboard** — Skills, experience, education, match insights
 - **CSV export** — Export parsed resume data
 - **Scalable architecture** — Queue-based microservices, Docker Swarm
-- **Load testing** — k6 and Artillery for capacity planning
+- **Load testing** — k6 for capacity planning
+
+## System design
+
+High-level architecture of the Resume Intelligence Platform:
+
+![Resume Intelligence System Design](docs/system-design/Resume_Inteligence_System_Design.png)
+
+---
 
 ## Tech Stack
 
@@ -48,12 +56,19 @@ resume-intelligence-platform/
 │   ├── queue-lib/                # BullMQ producers/consumers
 │   ├── resume-nlp/               # NLP utilities (Node)
 │   └── role-matching/            # Matching/scoring logic
-├── deployments/
+├── infra/                        # Infrastructure config (see infra/README.md)
 │   ├── docker-compose/           # Compose files (dev, prod, microservices)
 │   ├── swarm/                    # Docker Swarm stack
-│   └── kubernetes/               # K8s manifests (optional)
+│   ├── ansible/                  # Server provisioning
+│   ├── backup/                   # Backup scripts (Postgres, Redis)
+│   ├── docker/                   # Monitoring stack (Prometheus, Grafana, Loki)
+│   ├── health-checks/            # Health check script
+│   ├── monitoring/               # Prometheus, Grafana, Alertmanager
+│   └── postgres/                 # Init SQL and migrations
+├── docs/                         # Documentation
+│   └── system-design/            # System design diagrams
 ├── scripts/                      # Build, deploy, seed, migrate, stop-swarm
-├── load-testing/                 # k6 and Artillery configs
+├── load-testing/                 # k6 configs
 ├── package.json                  # Root scripts, turbo
 ├── pnpm-workspace.yaml
 └── turbo.json
@@ -111,12 +126,15 @@ pnpm run docker:start:build
 # Or use the script (with status/output)
 pnpm run docker:start
 ./scripts/start-all-services.sh --build
+
+# Full stack with monitoring (Prometheus, Grafana, Loki)
+pnpm run docker:start:full
 ```
 
 Direct Compose:
 
 ```bash
-docker-compose -f deployments/docker-compose/docker-compose.microservices.yml up -d
+docker-compose -f infra/docker-compose/docker-compose.microservices.yml up -d
 ```
 
 ### Option B: Local development (infra in Docker)
@@ -125,7 +143,7 @@ docker-compose -f deployments/docker-compose/docker-compose.microservices.yml up
 
 ```bash
 pnpm run docker:dev
-# Or: docker-compose -f deployments/docker-compose/docker-compose.dev.yml up
+# Or: docker-compose -f infra/docker-compose/docker-compose.dev.yml up
 ```
 
 2. Run apps locally (separate terminals):
@@ -194,7 +212,7 @@ Health: `curl http://localhost:3000/health`
 ## Database and data
 
 - **Migrations:** `./scripts/migrate-db.sh`
-- **Backup:** `./scripts/backup-postgres.sh`
+- **Backup:** `pnpm infra:backup:postgres` or `./infra/backup/scripts/backup-postgres.sh`
 - **Seed jobs:** `pnpm run seed:jobs` (or `bash scripts/seed-jobs.sh`)
 
 ---

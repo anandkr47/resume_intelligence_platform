@@ -8,7 +8,7 @@ set -e
 BUILD=false
 [[ "${1:-}" == "--build" ]] && BUILD=true
 
-COMPOSE_DIR="deployments/docker-compose"
+COMPOSE_DIR="infra/docker-compose"
 COMPOSE_FILES="-f $COMPOSE_DIR/docker-compose.microservices.yml -f $COMPOSE_DIR/docker-compose.scale.yml"
 UPLOAD_REPLICAS="${UPLOAD_REPLICAS:-3}"
 GATEWAY_REPLICAS="${GATEWAY_REPLICAS:-1}"

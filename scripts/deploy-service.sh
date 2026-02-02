@@ -37,20 +37,15 @@ fi
 case $ENVIRONMENT in
     docker-compose)
         echo "Updating docker-compose service..."
-        docker-compose -f deployments/docker-compose/docker-compose.yml up -d "${SERVICE_NAME}"
+        docker-compose -f infra/docker-compose/docker-compose.yml up -d "${SERVICE_NAME}"
         ;;
     swarm)
         echo "Updating Docker Swarm service..."
-        docker service update --image "${IMAGE_NAME}:${TAG}" "${SERVICE_NAME}"
-        ;;
-    kubernetes)
-        echo "Updating Kubernetes deployment..."
-        kubectl set image deployment/"${SERVICE_NAME}" "${SERVICE_NAME}=${IMAGE_NAME}:${TAG}"
-        kubectl rollout status deployment/"${SERVICE_NAME}"
+        docker service update --image "${IMAGE_NAME}:${TAG}" "resume-platform_${SERVICE_NAME}"
         ;;
     *)
         echo "Unknown environment: ${ENVIRONMENT}"
-        echo "Supported: docker-compose, swarm, kubernetes"
+        echo "Supported: docker-compose, swarm"
         exit 1
         ;;
 esac

@@ -59,10 +59,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Deploy to Kubernetes
+      - name: Deploy to Docker Swarm
         if: github.event.inputs.environment == 'production'
         run: |
-          echo "Deploying ${{ github.event.inputs.service }} to Kubernetes"
-          # Add your Kubernetes deployment commands here
-          # kubectl set image deployment/${{ github.event.inputs.service }} \
-          #   ${{ github.event.inputs.service }}=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ github.event.inputs.service }}:${{ github.event.inputs.tag }}
+          echo "Deploying ${{ github.event.inputs.service }} to Docker Swarm"
+          docker service update --image ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ github.event.inputs.service }}:${{ github.event.inputs.tag }} resume-platform_${{ github.event.inputs.service }}

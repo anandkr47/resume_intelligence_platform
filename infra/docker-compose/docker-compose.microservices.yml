@@ -176,7 +176,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ../../infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ../postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - resume-platform
     healthcheck:
@@ -201,6 +201,7 @@ services:
 
 networks:
   resume-platform:
+    name: resume-platform
     driver: bridge
 
 volumes:

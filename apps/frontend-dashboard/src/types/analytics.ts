@@ -66,8 +66,3 @@ export interface EducationBarChartProps {
   data: EducationStats[];
   height?: number;
 }
-
-export interface SkillsBarChartProps {
-  data: SkillCount[];
-  height?: number;
-}

@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-resume_db}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ../infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     healthcheck:
@@ -24,7 +24,7 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-      - ../../infra/redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ../redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: redis-server /usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

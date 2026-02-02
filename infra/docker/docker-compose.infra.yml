@@ -1,16 +1,20 @@
 version: '3.8'
 
 # Infrastructure services for Resume Intelligence Platform
-# This compose file includes monitoring, logging, and other infrastructure services
+# Run AFTER microservices: ./scripts/start-all-services.sh --build --infra
+# Paths are relative to infra/docker/ (../ = infra/)
 
 services:
-  # Prometheus for metrics
+  # Prometheus for metrics (needs resume-platform to scrape app services)
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    networks:
+      - monitoring
+      - resume-platform
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./monitoring/alerts:/etc/prometheus/alerts
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../monitoring/alerts:/etc/prometheus/alerts
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -19,22 +23,20 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
       - "9090:9090"
-    networks:
-      - monitoring
     restart: unless-stopped
 
-  # Grafana for visualization
+  # Grafana for visualization (port 3030 to avoid conflict with upload-service:3001)
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ../monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     ports:
-      - "3001:3000"
+      - "3030:3000"
     networks:
       - monitoring
     depends_on:
@@ -46,7 +48,7 @@ services:
     image: prom/alertmanager:latest
     container_name: alertmanager
     volumes:
-      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ../monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml
       - alertmanager_data:/alertmanager
     ports:
       - "9093:9093"
@@ -59,7 +61,7 @@ services:
     image: grafana/loki:latest
     container_name: loki
     volumes:
-      - ./logging/loki-config.yml:/etc/loki/local-config.yaml
+      - ../logging/loki-config.yml:/etc/loki/local-config.yaml
       - loki_data:/loki
     ports:
       - "3100:3100"
@@ -73,7 +75,7 @@ services:
     image: grafana/promtail:latest
     container_name: promtail
     volumes:
-      - ./logging/promtail-config.yml:/etc/promtail/config.yml
+      - ../logging/promtail-config.yml:/etc/promtail/config.yml
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
@@ -101,21 +103,19 @@ services:
       - monitoring
     restart: unless-stopped
 
-  # PostgreSQL Exporter
+  # PostgreSQL Exporter (requires postgres on resume-platform network)
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
     container_name: postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-resume_db}?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-resume_platform}?sslmode=disable"
     ports:
       - "9187:9187"
     networks:
-      - monitoring
-    depends_on:
-      - postgres
+      - resume-platform
     restart: unless-stopped
 
-  # Redis Exporter
+  # Redis Exporter (requires redis on resume-platform network)
   redis-exporter:
     image: oliver006/redis_exporter:latest
     container_name: redis-exporter
@@ -124,12 +124,12 @@ services:
     ports:
       - "9121:9121"
     networks:
-      - monitoring
-    depends_on:
-      - redis
+      - resume-platform
     restart: unless-stopped
 
 networks:
+  resume-platform:
+    external: true
   monitoring:
     driver: bridge
   logging:

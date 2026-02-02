@@ -8,12 +8,6 @@ ssl/prod/*.key
 *.crt
 *.csr
 
-# Terraform state files
-terraform/*.tfstate
-terraform/*.tfstate.*
-terraform/.terraform/
-terraform/.terraform.lock.hcl
-
 # Backup files
 backup/*.dump
 backup/*.rdb

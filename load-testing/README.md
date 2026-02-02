@@ -6,7 +6,6 @@ Load tests help find **upload capacity** (requests/sec, p95 latency) so you can 
 
 - **k6**: Not required on your machine. The npm scripts (`pnpm run load-test`, etc.) use `scripts/run-k6.sh`, which runs k6 via **Docker** (grafana/k6) if k6 is not in your PATH. Alternatively, [install k6](https://k6.io/docs/get-started/installation/) (e.g. `brew install k6`) for faster local runs.
 - **Docker**: Required to run load tests if k6 is not installed.
-- **Artillery** (optional): To run Artillery upload tests, install from repo root: `pnpm add -wD artillery form-data` then `pnpm install`.
 - Stack running (local or Swarm). For gateway on host use default `BASE_URL=http://localhost:3000`; the script maps this to `host.docker.internal` when using Docker.
 
 ## Running Tests
@@ -56,23 +55,6 @@ From the summary:
 BASE_URL=http://localhost:3000 FILES_PER_REQUEST=5 pnpm exec k6 run load-testing/k6/upload-batch.test.js
 ```
 
-### 4. Artillery (alternative)
-
-From repo root (so `form-data` is available):
-
-```bash
-cd load-testing/artillery && pnpm init -y && pnpm add form-data
-# From repo root:
-node -e "require('form-data')"  # or ensure form-data is in root package.json
-artillery run load-testing/artillery/upload.yml
-```
-
-Or add to root: `pnpm add -wD artillery form-data` and `pnpm install`, then:
-
-```bash
-pnpm exec artillery run load-testing/artillery/upload.yml
-```
-
 ## Interpreting Results
 
 | Metric | Use |
@@ -115,7 +97,7 @@ docker service ls
 
 ## Capacity tuning (per replica)
 
-Env vars (see `.env.swarm` and `deployments/swarm/stack.yml`):
+Env vars (see `.env.swarm` and `infra/swarm/stack.yml`):
 
 | Variable | Meaning | Suggested |
 |----------|---------|-----------|

@@ -45,7 +45,7 @@ fi
 
 # Deploy stack
 echo "Deploying stack..."
-docker stack deploy -c deployments/swarm/stack.yml resume-platform
+docker stack deploy -c infra/swarm/stack.yml resume-platform
 
 # Ensure DB schema exists (Postgres only runs init on empty data; run init SQL after deploy)
 echo "Ensuring DB schema..."
