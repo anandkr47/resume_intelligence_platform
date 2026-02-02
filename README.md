@@ -30,6 +30,20 @@ Resume processing job flow (upload → OCR → parser → matcher → dashboard 
 
 ---
 
+## UI Screenshots
+
+| Upload                                                                             | Resumes                                                                              |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| ![Upload](docs/screenshots/upload/Screenshot%202026-02-02%20at%202.49.20%20PM.png) | ![Resumes](docs/screenshots/resumes/Screenshot%202026-02-02%20at%202.46.30%20PM.png) |
+
+| Jobs                                                                           | Analytics                                                                                |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| ![Jobs](docs/screenshots/jobs/Screenshot%202026-02-02%20at%202.47.44%20PM.png) | ![Analytics](docs/screenshots/analytics/Screenshot%202026-02-02%20at%202.47.12%20PM.png) |
+
+_More screenshots: [docs/screenshots](docs/screenshots/README.md)_
+
+---
+
 ## Tech Stack
 
 | Layer      | Technology                                    |
@@ -89,6 +103,7 @@ resume-intelligence-platform/
 ├── docs/                         # Documentation
 │   ├── architecture/             # Architecture (components, data flow, queues)
 │   ├── runbooks/                 # Operations, incident response, troubleshooting
+│   ├── screenshots/              # UI screenshots (upload, resumes, jobs, analytics, flows)
 │   └── system-design/            # System design + processing flow diagrams
 ├── scripts/                      # Build, deploy, seed, migrate, stop-swarm
 ├── load-testing/                 # k6 configs
