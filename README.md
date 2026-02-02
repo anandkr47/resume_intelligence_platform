@@ -268,7 +268,7 @@ Health: `curl http://localhost:3000/health`
 | `pnpm docker:start`         | Start microservices (no build) via script          |
 | `pnpm docker:start:build`   | Build images + start microservices only            |
 | `pnpm docker:start:full`    | Build + microservices + monitoring (Grafana, etc.) |
-| `pnpm docker:down`          | Stop Compose stack                                 |
+| `pnpm docker:down`          | Stop microservices + monitoring (Grafana, etc.)    |
 | `pnpm docker:logs`          | Follow logs                                        |
 | `pnpm infra:start`          | Start monitoring stack (run after microservices)   |
 | `pnpm infra:stop`           | Stop monitoring stack                              |
