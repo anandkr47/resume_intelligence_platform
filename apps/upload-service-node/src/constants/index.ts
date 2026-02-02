@@ -12,9 +12,8 @@ export const RESUME_STATUS = {
   FAILED: 'failed',
 } as const;
 
-/** Database connection pool settings */
+/** Database connection pool settings (overridable via config.database.poolMax) */
 export const DB_POOL = {
-  MAX: 20,
   IDLE_TIMEOUT_MS: 30000,
-  CONNECTION_TIMEOUT_MS: 2000,
+  CONNECTION_TIMEOUT_MS: 5000,
 } as const;

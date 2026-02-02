@@ -3,6 +3,7 @@ import { config } from '@resume-platform/config';
 import { ResumeFilters } from '../types';
 import {
   buildFindAllResumesQuery,
+  buildCountResumesQuery,
   FIND_RESUME_BY_ID,
   COUNT_RESUMES,
   COUNT_RESUMES_BY_STATUS,
@@ -18,12 +19,35 @@ const pool = new Pool({
 });
 
 export class ResumeRepository {
-  async findAll(filters: ResumeFilters, limit: number = 100) {
+  async findAll(
+    filters: ResumeFilters,
+    limit: number = 100,
+    offset: number = 0,
+    sortBy: string = 'created_at',
+    sortOrder: 'asc' | 'desc' = 'desc'
+  ) {
     const client = await pool.connect();
     try {
-      const { text, values } = buildFindAllResumesQuery(filters, limit);
+      const { text, values } = buildFindAllResumesQuery(
+        filters,
+        limit,
+        offset,
+        sortBy,
+        sortOrder
+      );
       const result = await client.query(text, values);
       return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  async countWithFilters(filters: ResumeFilters): Promise<number> {
+    const client = await pool.connect();
+    try {
+      const { text, values } = buildCountResumesQuery(filters);
+      const result = await client.query(text, values);
+      return parseInt(result.rows[0]?.count || '0', 10);
     } finally {
       client.release();
     }

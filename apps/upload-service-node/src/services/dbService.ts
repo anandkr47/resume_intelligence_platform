@@ -10,13 +10,15 @@ import {
   DELETE_RESUME,
 } from '../queries';
 
+const poolMax = config.database.poolMax ?? 20;
+
 const pool = new Pool({
   host: config.database.host,
   port: config.database.port,
   user: config.database.user,
   password: config.database.password,
   database: config.database.database,
-  max: DB_POOL.MAX,
+  max: poolMax,
   idleTimeoutMillis: DB_POOL.IDLE_TIMEOUT_MS,
   connectionTimeoutMillis: DB_POOL.CONNECTION_TIMEOUT_MS,
 });

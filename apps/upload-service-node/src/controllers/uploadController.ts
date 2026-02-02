@@ -10,6 +10,7 @@ import { validateFile } from '../validators/fileValidator';
 import { dbService } from '../services/dbService';
 import { generateUniqueFileName, getUploadPath } from '../utils/fileUtils';
 import { queueHandler } from '../queues/queueHandler';
+import { createConcurrencyLimiter } from '../utils/concurrency';
 import { UPLOADS, RESUME_STATUS } from '../constants';
 
 const uploadsDir = config.upload.directory || UPLOADS.DEFAULT_DIR;
@@ -17,7 +18,11 @@ fs.mkdir(uploadsDir, { recursive: true }).catch(err => {
   logger.error('Failed to create uploads directory', { error: err.message });
 });
 
+/** Limit concurrent uploads per process when UPLOAD_MAX_CONCURRENT is set; scale via replicas for more capacity */
+const uploadLimiter = createConcurrencyLimiter(config.upload.maxConcurrent ?? 0);
+
 export async function uploadSingle(request: FastifyRequest, reply: FastifyReply) {
+  await uploadLimiter.acquire();
   try {
     const data = await request.file();
 
@@ -72,10 +77,13 @@ export async function uploadSingle(request: FastifyRequest, reply: FastifyReply)
   } catch (error: any) {
     logger.error('Upload error', { error: error.message, stack: error.stack });
     return reply.status(500).send({ error: 'Failed to upload resume' });
+  } finally {
+    uploadLimiter.release();
   }
 }
 
 export async function uploadMultiple(request: FastifyRequest, reply: FastifyReply) {
+  await uploadLimiter.acquire();
   try {
     const parts = request.parts();
     const results: Array<{ resumeId?: string; fileName: string; status: string; error?: string }> = [];
@@ -178,6 +186,8 @@ export async function uploadMultiple(request: FastifyRequest, reply: FastifyRepl
   } catch (error: any) {
     logger.error('Batch upload error', { error: error.message });
     return reply.status(500).send({ error: 'Failed to process uploads' });
+  } finally {
+    uploadLimiter.release();
   }
 }
 

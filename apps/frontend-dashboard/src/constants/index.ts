@@ -1,5 +1,10 @@
 export { API_BASE_URL, API_PATHS } from './api';
 export { COPY } from './copy';
+export {
+  TABLE_SKELETON_VARIANTS,
+  SKELETON_COLUMN_WIDTHS,
+  CHART_SKELETON_BAR_HEIGHTS,
+} from './skeleton';
 
 export const ALLOWED_FILE_TYPES = {
   'application/pdf': ['.pdf'],

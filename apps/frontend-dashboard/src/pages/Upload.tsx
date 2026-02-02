@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { uploadService } from '../services/uploadService';
-import { Card } from '../components/Card';
-import { StatusBadge } from '../components/StatusBadge';
+import { Card, StatusBadge } from '../components/common';
 import { ALLOWED_FILE_TYPES, COPY } from '../constants';
 import { Upload as UploadIcon, File, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { UploadResult } from '../types';

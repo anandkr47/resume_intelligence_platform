@@ -28,6 +28,16 @@ export interface RoleMatchSummary {
   avg_score: number;
 }
 
+/** Paginated role matches API response */
+export interface RoleMatchesResponse {
+  data: RoleMatch[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  uniqueRoles: { id: string; title: string }[];
+}
+
 /** Role match row (from getRoleMatches API) */
 export interface RoleMatch {
   role_id: string;
@@ -54,10 +64,5 @@ export interface ExperienceChartProps {
 
 export interface EducationBarChartProps {
   data: EducationStats[];
-  height?: number;
-}
-
-export interface SkillsBarChartProps {
-  data: SkillCount[];
   height?: number;
 }

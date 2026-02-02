@@ -1,0 +1,6 @@
+# Override for scaled stack: do not publish upload-service port so multiple replicas can run.
+# Compose merges ports by default; !reset replaces so the base port mapping is removed.
+# Use: docker-compose -f docker-compose.microservices.yml -f docker-compose.scale.yml up -d --scale upload-service=3 --scale api-gateway=1
+services:
+  upload-service:
+    ports: !reset []

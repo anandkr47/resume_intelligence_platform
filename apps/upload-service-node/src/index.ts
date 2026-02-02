@@ -55,7 +55,7 @@ const PORT = config.uploadService.port;
 const start = async () => {
   try {
     await setup();
-    await app.listen({ port: PORT, host: '0.0.0.0' });
+    await app.listen({ port: PORT, host: '0.0.0.0', backlog: 512 });
     logger.info(`Upload Service running on port ${PORT}`);
   } catch (err) {
     logger.error('Error starting server', { error: err });
