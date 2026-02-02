@@ -26,20 +26,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-COMPOSE_FILE="deployments/docker-compose/docker-compose.microservices.yml"
+COMPOSE_FILE="infra/docker-compose/docker-compose.microservices.yml"
 
 echo "========================================="
 echo "Starting Resume Intelligence Platform"
 echo "========================================="
 echo ""
-
-# Start infrastructure services if requested
-if [ "$INFRA" = true ]; then
-    echo "Starting infrastructure services (monitoring, logging)..."
-    docker-compose -f infra/docker/docker-compose.infra.yml up -d
-    echo "✓ Infrastructure services started"
-    echo ""
-fi
 
 # Build images if requested
 if [ "$BUILD" = true ]; then
@@ -49,9 +41,16 @@ if [ "$BUILD" = true ]; then
     echo ""
 fi
 
-# Start all services
+# Start all services (microservices first)
 echo "Starting all microservices..."
 docker-compose -f "$COMPOSE_FILE" up -d
+
+# Start infrastructure services if requested (uses resume-platform network)
+if [ "$INFRA" = true ]; then
+    echo "Starting infrastructure services (monitoring, logging)..."
+    docker-compose -f infra/docker/docker-compose.infra.yml up -d
+    echo "✓ Infrastructure services started"
+fi
 
 echo ""
 echo "========================================="
@@ -80,7 +79,7 @@ echo ""
 
 if [ "$INFRA" = true ]; then
     echo "  Prometheus:    http://localhost:9090"
-    echo "  Grafana:       http://localhost:3001 (admin/admin)"
+    echo "  Grafana:       http://localhost:3030 (admin/admin)"
     echo ""
 fi
 

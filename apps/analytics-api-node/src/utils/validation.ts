@@ -25,3 +25,15 @@ export function sanitizeKeyword(keyword: string | undefined): string | undefined
   if (!keyword) return undefined;
   return keyword.trim().substring(0, VALIDATION.MAX_KEYWORD_LENGTH);
 }
+
+export function validatePage(page: string | undefined, defaultPage: number = 1): number {
+  if (!page) return defaultPage;
+  const parsed = parseInt(page, 10);
+  if (isNaN(parsed) || parsed < 1) return defaultPage;
+  return parsed;
+}
+
+export function validateSortOrder(order: string | undefined): 'asc' | 'desc' {
+  if (order === 'asc' || order === 'ASC') return 'asc';
+  return 'desc';
+}

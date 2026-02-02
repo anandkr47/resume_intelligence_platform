@@ -71,9 +71,9 @@ else
     echo "○ Not running (optional)"
 fi
 
-# Check Grafana (if running)
+# Check Grafana (if running, port 3030)
 echo -n "Grafana: "
-if curl -sf http://localhost:3001/api/health > /dev/null 2>&1; then
+if curl -sf http://localhost:3030/api/health > /dev/null 2>&1; then
     echo "✓ Healthy"
 else
     echo "○ Not running (optional)"

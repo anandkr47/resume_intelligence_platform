@@ -11,7 +11,24 @@ An automated, scalable resume parsing and analytics platform that processes resu
 - **Analytics dashboard** — Skills, experience, education, match insights
 - **CSV export** — Export parsed resume data
 - **Scalable architecture** — Queue-based microservices, Docker Swarm
-- **Load testing** — k6 and Artillery for capacity planning
+- **Load testing** — k6 for capacity planning
+
+## System design
+
+High-level architecture of the Resume Intelligence Platform:
+
+![Resume Intelligence Platform System Design](docs/system-design/Resume_Inteligence_Platform_System_Design.png)
+
+Resume processing job flow (upload → OCR → parser → matcher → dashboard and export):
+
+![Resume Processing Job Flow](docs/system-design/Resume_Processing_Job_Flow.png)
+
+**Detailed documentation:**
+
+- **[Architecture](docs/architecture/README.md)** — Components, data flow, queues, deployment
+- **[Runbooks](docs/runbooks/README.md)** — Operations, incident response, troubleshooting
+
+---
 
 ## Tech Stack
 
@@ -48,12 +65,21 @@ resume-intelligence-platform/
 │   ├── queue-lib/                # BullMQ producers/consumers
 │   ├── resume-nlp/               # NLP utilities (Node)
 │   └── role-matching/            # Matching/scoring logic
-├── deployments/
+├── infra/                        # Infrastructure config (see infra/README.md)
 │   ├── docker-compose/           # Compose files (dev, prod, microservices)
 │   ├── swarm/                    # Docker Swarm stack
-│   └── kubernetes/               # K8s manifests (optional)
+│   ├── ansible/                  # Server provisioning
+│   ├── backup/                   # Backup scripts (Postgres, Redis)
+│   ├── docker/                   # Monitoring stack (Prometheus, Grafana, Loki)
+│   ├── health-checks/            # Health check script
+│   ├── monitoring/               # Prometheus, Grafana, Alertmanager
+│   └── postgres/                 # Init SQL and migrations
+├── docs/                         # Documentation
+│   ├── architecture/             # Architecture (components, data flow, queues)
+│   ├── runbooks/                 # Operations, incident response, troubleshooting
+│   └── system-design/            # System design + processing flow diagrams
 ├── scripts/                      # Build, deploy, seed, migrate, stop-swarm
-├── load-testing/                 # k6 and Artillery configs
+├── load-testing/                 # k6 configs
 ├── package.json                  # Root scripts, turbo
 ├── pnpm-workspace.yaml
 └── turbo.json
@@ -111,12 +137,15 @@ pnpm run docker:start:build
 # Or use the script (with status/output)
 pnpm run docker:start
 ./scripts/start-all-services.sh --build
+
+# Full stack with monitoring (Prometheus, Grafana, Loki)
+pnpm run docker:start:full
 ```
 
 Direct Compose:
 
 ```bash
-docker-compose -f deployments/docker-compose/docker-compose.microservices.yml up -d
+docker-compose -f infra/docker-compose/docker-compose.microservices.yml up -d
 ```
 
 ### Option B: Local development (infra in Docker)
@@ -125,7 +154,7 @@ docker-compose -f deployments/docker-compose/docker-compose.microservices.yml up
 
 ```bash
 pnpm run docker:dev
-# Or: docker-compose -f deployments/docker-compose/docker-compose.dev.yml up
+# Or: docker-compose -f infra/docker-compose/docker-compose.dev.yml up
 ```
 
 2. Run apps locally (separate terminals):
@@ -191,10 +220,23 @@ Health: `curl http://localhost:3000/health`
 
 ---
 
+## Commit conventions
+
+The repo uses **Husky**, **lint-staged**, and **Commitlint** with [Conventional Commits](https://www.conventionalcommits.org/):
+
+- **pre-commit:** Runs **lint-staged** — ESLint (fix) and Prettier on staged `.ts`, `.tsx`, `.js`, `.json`, `.md`, `.yml` files.
+- **commit-msg:** Runs **Commitlint** — enforces conventional commit format.
+
+**Commit format:** `type(scope?): subject` (e.g. `feat(upload): add batch upload`, `fix(parser): handle empty PDF`). Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Header max 100 characters.
+
+After `pnpm install`, the `prepare` script installs Husky hooks automatically.
+
+---
+
 ## Database and data
 
 - **Migrations:** `./scripts/migrate-db.sh`
-- **Backup:** `./scripts/backup-postgres.sh`
+- **Backup:** `pnpm infra:backup:postgres` or `./infra/backup/scripts/backup-postgres.sh`
 - **Seed jobs:** `pnpm run seed:jobs` (or `bash scripts/seed-jobs.sh`)
 
 ---

@@ -24,6 +24,19 @@ export interface ResumeFilters {
   location?: string;
   minScore?: number;
   roleId?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+/** Paginated API response */
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 /** Single file upload result */

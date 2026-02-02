@@ -1,0 +1,12 @@
+# Log rotation for Resume Intelligence Platform
+# Managed by Ansible
+
+/var/log/resume-platform/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 {{ app_user }} {{ app_user }}
+}

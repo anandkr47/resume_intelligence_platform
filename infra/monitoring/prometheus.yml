@@ -25,11 +25,11 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # API Gateway
+  # API Gateway (service names match docker-compose.microservices.yml)
   - job_name: 'api-gateway'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['api-gateway-node:3000']
+      - targets: ['api-gateway:3000']
         labels:
           service: 'api-gateway'
           type: 'api'
@@ -38,7 +38,7 @@ scrape_configs:
   - job_name: 'analytics-api'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['analytics-api-node:3002']
+      - targets: ['analytics-api:3002']
         labels:
           service: 'analytics-api'
           type: 'api'
@@ -47,17 +47,18 @@ scrape_configs:
   - job_name: 'upload-service'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['upload-service-node:3001']
+      - targets: ['upload-service:3001']
         labels:
           service: 'upload-service'
           type: 'api'
 
-  # Node.js Workers
+  # Node.js Workers (metrics port if exposed)
   - job_name: 'node-workers'
+    metrics_path: '/metrics'
     static_configs:
       - targets:
-          - 'matcher-worker-node:9090'
-          - 'export-worker-node:9090'
+          - 'matcher-worker:9090'
+          - 'export-worker:9090'
         labels:
           type: 'worker'
           runtime: 'nodejs'

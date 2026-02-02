@@ -7,7 +7,7 @@ export const gatewayRoutes: Record<string, GatewayRouteConfig> = {
     upstream: config.uploadService.url,
     prefix: '/api/upload',
     rewritePrefix: '/api/v1/upload',
-    timeout: 30000, // 30 seconds for file uploads
+    timeout: 60000, // 60s for batch uploads; scale upload-service replicas for capacity
   },
   analytics: {
     upstream: config.analyticsApi.url,
@@ -29,9 +29,10 @@ export const gatewayRoutes: Record<string, GatewayRouteConfig> = {
   },
 };
 
+// Rate limit: set RATE_LIMIT_MAX high (e.g. 10000) for load testing so uploads don't get 429
 export const rateLimitConfig = {
-  max: 100,
-  timeWindow: '15 minutes',
+  max: parseInt(process.env.RATE_LIMIT_MAX || '10000', 10),
+  timeWindow: process.env.RATE_LIMIT_WINDOW || '15 minutes',
 };
 
 export const corsConfig = {

@@ -8,6 +8,7 @@ export interface DatabaseConfig {
   user: string;
   password: string;
   database: string;
+  poolMax?: number;
 }
 
 export interface RedisConfig {
@@ -27,6 +28,8 @@ export interface UploadConfig {
   maxSize: number;
   allowedTypes: string[];
   directory?: string;
+  /** Max concurrent upload requests per process (0 = no limit). Used to avoid OOM under burst. */
+  maxConcurrent?: number;
 }
 
 export const config = {
@@ -36,6 +39,7 @@ export const config = {
     user: process.env.POSTGRES_USER || 'resume_user',
     password: process.env.POSTGRES_PASSWORD || 'resume_password',
     database: process.env.POSTGRES_DB || 'resume_db',
+    poolMax: parseInt(process.env.DB_POOL_MAX || '20', 10),
   } as DatabaseConfig,
 
   redis: {
@@ -59,6 +63,7 @@ export const config = {
     maxSize: parseInt(process.env.UPLOAD_MAX_SIZE || '10485760', 10), // 10MB default
     allowedTypes: (process.env.UPLOAD_ALLOWED_TYPES || 'application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png').split(','),
     directory: process.env.UPLOAD_DIRECTORY || '/app/uploads',
+    maxConcurrent: parseInt(process.env.UPLOAD_MAX_CONCURRENT || '0', 10), // 0 = no limit; set per-replica under burst (e.g. 50)
   } as UploadConfig,
 
   apiGateway: {

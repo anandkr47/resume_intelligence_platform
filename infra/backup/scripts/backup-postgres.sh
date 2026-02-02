@@ -15,7 +15,7 @@ mkdir -p "$BACKUP_DIR"
 PGHOST="${POSTGRES_HOST:-postgres}"
 PGPORT="${POSTGRES_PORT:-5432}"
 PGUSER="${POSTGRES_USER:-postgres}"
-PGDATABASE="${POSTGRES_DB:-resume_db}"
+PGDATABASE="${POSTGRES_DB:-resume_platform}"
 
 echo "Starting PostgreSQL backup..."
 echo "Database: $PGDATABASE"

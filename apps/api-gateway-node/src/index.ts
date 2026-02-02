@@ -55,7 +55,7 @@ const HOST = config.apiGateway.host;
 const start = async () => {
   try {
     await setup();
-    await app.listen({ port: PORT, host: HOST });
+    await app.listen({ port: PORT, host: HOST, backlog: 512 });
     logger.info(`API Gateway running on ${HOST}:${PORT}`);
   } catch (err) {
     logger.error('Error starting server', { error: err });

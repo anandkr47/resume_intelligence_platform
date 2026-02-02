@@ -34,12 +34,53 @@ class AnalyticsService {
     return analyticsRepository.getEducationStats(ANALYTICS.DEFAULT_EDUCATION_STATS_LIMIT);
   }
 
-  async getRoleMatches(roleId?: string, minScore: number = 0) {
-    return matchRepository.findByRole(roleId, minScore, ANALYTICS.DEFAULT_MATCH_LIMIT);
+  async getRoleMatches(
+    roleId?: string,
+    minScore: number = 0,
+    pagination?: { page: number; limit: number }
+  ) {
+    const page = pagination?.page ?? 1;
+    const limit = pagination?.limit ?? ANALYTICS.DEFAULT_MATCH_LIMIT;
+    const offset = (page - 1) * limit;
+
+    const [data, total, uniqueRoles] = await Promise.all([
+      matchRepository.findByRole(roleId, minScore, limit, offset),
+      matchRepository.countByRole(roleId, minScore),
+      matchRepository.getRolesWithMatches(minScore),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+      uniqueRoles,
+    };
   }
 
-  async getResumes(filters: ResumeFilters) {
-    return resumeRepository.findAll(filters, ANALYTICS.DEFAULT_RESUME_LIST_LIMIT);
+  async getResumes(
+    filters: ResumeFilters,
+    pagination?: { page: number; limit: number; sortBy: string; sortOrder: 'asc' | 'desc' }
+  ) {
+    const page = pagination?.page ?? 1;
+    const limit = pagination?.limit ?? ANALYTICS.DEFAULT_RESUME_LIST_LIMIT;
+    const sortBy = pagination?.sortBy ?? 'created_at';
+    const sortOrder = pagination?.sortOrder ?? 'desc';
+    const offset = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      resumeRepository.findAll(filters, limit, offset, sortBy, sortOrder),
+      resumeRepository.countWithFilters(filters),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit) || 1,
+    };
   }
 
   async getResume(id: string) {

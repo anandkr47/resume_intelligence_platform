@@ -50,5 +50,5 @@ echo "  3. Database is accessible"
 echo ""
 echo "You can check service status with:"
 echo "  pnpm docker:ps"
-echo "  docker-compose -f deployments/docker-compose/docker-compose.microservices.yml ps"
+echo "  docker-compose -f infra/docker-compose/docker-compose.microservices.yml ps"
 exit 1

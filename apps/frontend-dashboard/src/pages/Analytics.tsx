@@ -1,8 +1,7 @@
 import React from 'react';
-import { Loading } from '../components/Loading';
-import { Card } from '../components/Card';
-import { StatCard } from '../components/StatCard';
-import { EmptyState } from '../components/EmptyState';
+import { Card, Pagination, StatCard } from '../components/common';
+import { StatCardSkeleton, ChartSkeleton, TableSkeleton } from '../components/skeletons';
+import { EmptyState } from '../components/common';
 import { SkillsPieChart, EducationBarChart, ExperienceChart } from '../charts';
 import { formatMatchScore, formatNumber, normalizeMatchScore } from '../utils/formatters';
 import { TrendingUp, Award, GraduationCap, Target, AlertTriangle } from 'lucide-react';
@@ -16,16 +15,21 @@ export const Analytics: React.FC = () => {
     education,
     matches,
     uniqueRoles,
+    matchesTotal,
+    matchesPage,
+    matchesTotalPages,
+    matchesLimit,
     selectedRole,
     setSelectedRole,
+    minScore,
+    setMinScore,
+    setMatchesPage,
+    setMatchesPageSize,
     loading,
+    matchesLoading,
     error,
     loadAnalytics,
   } = useAnalyticsPage();
-
-  if (loading) {
-    return <Loading message={COPY.LOADING.ANALYTICS} />;
-  }
 
   if (error) {
     return (
@@ -46,7 +50,7 @@ export const Analytics: React.FC = () => {
   }
 
   return (
-    <div className="animate-fade-in space-y-8 font-sans">
+    <div className={`space-y-8 font-sans ${!loading ? 'animate-fade-in' : ''}`}>
       <div className="mb-8 text-center md:text-left">
         <h1 className="text-5xl font-bold font-display text-white mb-3 drop-shadow-lg">
           {COPY.PAGES.ANALYTICS.TITLE}
@@ -57,6 +61,15 @@ export const Analytics: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {loading ? (
+          <>
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </>
+        ) : (
+        <>
         <StatCard
           title={COPY.STATS.AVG_EXPERIENCE}
           value={
@@ -84,11 +97,13 @@ export const Analytics: React.FC = () => {
         />
         <StatCard
           title={COPY.STATS.ROLE_MATCHES}
-          value={formatNumber(matches.length)}
+          value={formatNumber(matchesTotal)}
           label={COPY.STATS.TOTAL_MATCHES}
           icon={Target}
           variant="secondary"
         />
+        </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -98,7 +113,9 @@ export const Analytics: React.FC = () => {
           className="animate-slide-up"
           style={{ animationDelay: '400ms' }}
         >
-          {skills?.length > 0 ? (
+          {loading ? (
+            <ChartSkeleton height={260} />
+          ) : skills?.length > 0 ? (
             <SkillsPieChart data={skills} limit={10} />
           ) : (
             <EmptyState icon="📊" title={COPY.EMPTY.NO_SKILLS} />
@@ -111,7 +128,9 @@ export const Analytics: React.FC = () => {
           className="animate-slide-up"
           style={{ animationDelay: '500ms' }}
         >
-          {education?.length > 0 ? (
+          {loading ? (
+            <ChartSkeleton height={260} />
+          ) : education?.length > 0 ? (
             <EducationBarChart data={education} />
           ) : (
             <EmptyState icon="🎓" title={COPY.EMPTY.NO_EDUCATION} />
@@ -119,7 +138,7 @@ export const Analytics: React.FC = () => {
         </Card>
       </div>
 
-      {experience &&
+      {!loading && experience &&
         (Number(experience.max_years) > 0 || Number(experience.avg_years) > 0) && (
           <Card
             title={COPY.CHARTS.EXPERIENCE_STATS}
@@ -137,42 +156,56 @@ export const Analytics: React.FC = () => {
         className="animate-slide-up"
         style={{ animationDelay: '700ms' }}
       >
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <label className="block text-sm font-semibold text-gray-700">
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               {COPY.LABELS.FILTER_BY_ROLE}
             </label>
-            <span className="text-xs text-gray-500">
-              {COPY.TABLE.SHOWING(Math.min(matches.length, 50), matches.length)}
-            </span>
+            <select
+              className="input max-w-xs w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+            >
+              <option value="">{COPY.LABELS.ALL_ROLES}</option>
+              {uniqueRoles.map((role) => (
+                <option key={role.id} value={role.id}>
+                  {role.title}
+                </option>
+              ))}
+            </select>
           </div>
-          <select
-            className="input max-w-xs w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
-          >
-            <option value="">{COPY.LABELS.ALL_ROLES}</option>
-            {uniqueRoles.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.title}
-              </option>
-            ))}
-          </select>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              {COPY.LABELS.MIN_MATCH_SCORE}
+            </label>
+            <input
+              type="number"
+              className="input max-w-xs w-full"
+              min={0}
+              max={100}
+              placeholder="0"
+              value={minScore}
+              onChange={(e) => setMinScore(parseFloat(e.target.value) || 0)}
+            />
+          </div>
         </div>
 
-        {matches.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="table w-full">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-3 text-left">{COPY.LABELS.ROLE}</th>
-                  <th className="px-4 py-3 text-left">{COPY.LABELS.RESUME}</th>
-                  <th className="px-4 py-3 text-left">{COPY.LABELS.MATCH_SCORE}</th>
-                  <th className="px-4 py-3 text-left">{COPY.LABELS.MATCHED_SKILLS}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {matches.slice(0, 50).map((match, index) => {
+        {matchesLoading ? (
+          <TableSkeleton variant="matches" rowCount={8} />
+        ) : matches.length > 0 ? (
+          <>
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="table w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-4 py-3 text-left">{COPY.LABELS.ROLE}</th>
+                    <th className="px-4 py-3 text-left">{COPY.LABELS.RESUME}</th>
+                    <th className="px-4 py-3 text-left">{COPY.LABELS.MATCH_SCORE}</th>
+                    <th className="px-4 py-3 text-left">{COPY.LABELS.MATCHED_SKILLS}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {matches.map((match, index) => {
                   const score = normalizeMatchScore(match.match_score);
                   const scoreClass =
                     score >= 70
@@ -225,7 +258,20 @@ export const Analytics: React.FC = () => {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+            {matchesTotalPages > 1 && (
+              <Pagination
+                page={matchesPage}
+                totalPages={matchesTotalPages}
+                total={matchesTotal}
+                limit={matchesLimit}
+                onPageChange={setMatchesPage}
+                onPageSizeChange={setMatchesPageSize}
+                pageSizeOptions={[5, 10, 20, 50]}
+                showPageSize={true}
+              />
+            )}
+          </>
         ) : (
           <EmptyState
             icon="🎯"

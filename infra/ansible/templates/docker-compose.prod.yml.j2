@@ -1,0 +1,9 @@
+# Ansible-generated docker-compose for {{ environment }}
+# Source: infra/docker-compose/docker-compose.prod.yml
+
+version: '3.8'
+
+services:
+  api-gateway:
+    image: {{ docker_registry | default('') }}/api-gateway:latest
+    # ... extend from base; this is a placeholder for Ansible deployment
