@@ -10,6 +10,8 @@ Screenshots and visual references for the Resume Intelligence Platform frontend.
 
 ![Resumes](resumes/Screenshot%202026-02-02%20at%202.46.30%20PM.png)
 
+![Resumes detail](resumes/Screenshot%202026-02-02%20at%203.25.56%20PM.png)
+
 ## Jobs
 
 ![Jobs list](jobs/Screenshot%202026-02-02%20at%202.47.44%20PM.png)
