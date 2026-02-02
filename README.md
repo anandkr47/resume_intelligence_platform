@@ -36,9 +36,13 @@ Resume processing job flow (upload → OCR → parser → matcher → dashboard 
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | ![Upload](docs/screenshots/upload/Screenshot%202026-02-02%20at%202.49.20%20PM.png) | ![Resumes](docs/screenshots/resumes/Screenshot%202026-02-02%20at%202.46.30%20PM.png) |
 
-| Jobs                                                                           | Analytics                                                                                |
-| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| ![Jobs](docs/screenshots/jobs/Screenshot%202026-02-02%20at%202.47.44%20PM.png) | ![Analytics](docs/screenshots/analytics/Screenshot%202026-02-02%20at%202.47.12%20PM.png) |
+| Resumes (detail)                                                                            | Jobs                                                                           |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| ![Resumes detail](docs/screenshots/resumes/Screenshot%202026-02-02%20at%203.25.56%20PM.png) | ![Jobs](docs/screenshots/jobs/Screenshot%202026-02-02%20at%202.47.44%20PM.png) |
+
+| Analytics                                                                                |
+| ---------------------------------------------------------------------------------------- |
+| ![Analytics](docs/screenshots/analytics/Screenshot%202026-02-02%20at%202.47.12%20PM.png) |
 
 _More screenshots: [docs/screenshots](docs/screenshots/README.md)_
 
