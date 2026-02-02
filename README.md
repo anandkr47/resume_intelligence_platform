@@ -19,6 +19,10 @@ High-level architecture of the Resume Intelligence Platform:
 
 ![Resume Intelligence Platform System Design](docs/system-design/Resume_Inteligence_Platform_System_Design.png)
 
+Resume processing job flow (upload → OCR → parser → matcher → dashboard and export):
+
+![Resume Processing Job Flow](docs/system-design/Resume_Processing_Job_Flow.png)
+
 **Detailed documentation:**
 
 - **[Architecture](docs/architecture/README.md)** — Components, data flow, queues, deployment
