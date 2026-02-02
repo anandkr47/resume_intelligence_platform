@@ -7,7 +7,7 @@ import { config } from '@resume-platform/config';
 import { logger } from '@resume-platform/logger';
 import { registerRoutes } from './routes';
 import { errorHandler } from './middleware/errorHandler';
-import { rateLimitConfig, corsConfig } from './config/gatewayConfig';
+import { rateLimitConfig, corsConfig, helmetConfig } from './config/gatewayConfig';
 
 const app: FastifyInstance = Fastify({
   logger: false, // We use our custom logger
@@ -19,18 +19,19 @@ async function setup() {
   // Register plugins
   await app.register(cors, corsConfig);
 
-  await app.register(helmet);
+  await app.register(helmet, helmetConfig);
 
   await app.register(rateLimit, rateLimitConfig);
 
   // Request logging middleware
-  app.addHook('onRequest', async (request, reply) => {
+  type RequestWithStartTime = { startTime?: number };
+  app.addHook('onRequest', async (request, _reply) => {
     const start = Date.now();
-    (request as any).startTime = start;
+    (request as RequestWithStartTime).startTime = start;
   });
 
   app.addHook('onSend', async (request, reply) => {
-    const startTime = (request as any).startTime || Date.now();
+    const startTime = (request as RequestWithStartTime).startTime ?? Date.now();
     const duration = Date.now() - startTime;
     logger.info('HTTP Request', {
       method: request.method,

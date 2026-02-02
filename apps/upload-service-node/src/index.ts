@@ -1,5 +1,7 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
 import multipart from '@fastify/multipart';
 import { randomUUID } from 'crypto';
 import { config } from '@resume-platform/config';
@@ -13,11 +15,39 @@ const app: FastifyInstance = Fastify({
   genReqId: () => randomUUID(),
 });
 
+/** Helmet security options (industry-standard HTTP headers). */
+const helmetOptions = {
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'same-site' as const },
+  crossOriginOpenerPolicy: { policy: 'same-origin' as const },
+  dnsPrefetchControl: { allow: false },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  ieNoOpen: true,
+  noSniff: true,
+  originAgentCluster: true,
+  permittedCrossDomainPolicies: { permittedPolicies: 'none' as const },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' as const },
+};
+
+/** Rate limit for upload service (per IP). */
+const rateLimitOptions = {
+  max: parseInt(process.env.RATE_LIMIT_MAX || '500', 10),
+  timeWindow: process.env.RATE_LIMIT_WINDOW || '15 minutes',
+};
+
+const corsOptions = {
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
 async function setup() {
-  // Register plugins
-  await app.register(cors, {
-    origin: true,
-  });
+  // Security: Helmet (HTTP headers), rate-limit, CORS
+  await app.register(helmet, helmetOptions);
+  await app.register(rateLimit, rateLimitOptions);
+  await app.register(cors, corsOptions);
 
   await app.register(multipart, {
     limits: {
@@ -26,13 +56,14 @@ async function setup() {
   });
 
   // Request logging
-  app.addHook('onRequest', async (request, reply) => {
+  type RequestWithStartTime = { startTime?: number };
+  app.addHook('onRequest', async (request, _reply) => {
     const start = Date.now();
-    (request as any).startTime = start;
+    (request as RequestWithStartTime).startTime = start;
   });
 
   app.addHook('onSend', async (request, reply) => {
-    const startTime = (request as any).startTime || Date.now();
+    const startTime = (request as RequestWithStartTime).startTime ?? Date.now();
     const duration = Date.now() - startTime;
     logger.info('HTTP Request', {
       method: request.method,
