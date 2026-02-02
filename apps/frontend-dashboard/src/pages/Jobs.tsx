@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { JobCard } from '../components/JobCard';
-import { Card } from '../components/Card';
-import { Loading } from '../components/Loading';
-import { EmptyState } from '../components/EmptyState';
+import { Card, EmptyState } from '../components/common';
+import { JobCardSkeleton } from '../components/skeletons';
 import { JobDetailModal } from '../components/JobDetailModal';
 import { Search, Filter, Briefcase } from 'lucide-react';
 import { useJobs } from '../hooks/useJobs';
@@ -61,12 +60,8 @@ export const Jobs: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <Loading message={COPY.LOADING.JOBS} />;
-  }
-
   return (
-    <div className="animate-fade-in space-y-8">
+    <div className={`space-y-8 ${!loading ? 'animate-fade-in' : ''}`}>
       <div className="mb-8">
         <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">
           {COPY.PAGES.JOBS.TITLE}
@@ -128,7 +123,13 @@ export const Jobs: React.FC = () => {
         </div>
       </Card>
 
-      {filteredJobs.length > 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <JobCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : filteredJobs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredJobs.map((job) => {
             const match = jobMatches[job.jobId];

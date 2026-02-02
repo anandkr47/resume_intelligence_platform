@@ -2,7 +2,7 @@
 # Run k6 load test: use local k6 if available, otherwise Docker (grafana/k6).
 # Usage: ./scripts/run-k6.sh [k6 script path]
 # Example: ./scripts/run-k6.sh load-testing/k6/upload.test.js
-# BASE_URL is passed through (default for Docker: http://host.docker.internal:3000).
+# BASE_URL is passed through (default http://localhost:3000; works with Docker Compose gateway on host:3000).
 
 set -e
 SCRIPT="${1:-load-testing/k6/upload.test.js}"

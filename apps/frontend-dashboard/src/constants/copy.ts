@@ -159,6 +159,9 @@ export const COPY = {
   /** Table */
   TABLE: {
     SHOWING: (shown: number, total: number) => `Showing ${Math.min(shown, 50)} of ${total} matches`,
+    SHOWING_PAGINATED: (start: number, end: number, total: number) =>
+      `Showing ${start}-${end} of ${total}`,
+    PER_PAGE: 'Per page',
     FILE_NAME: 'File Name',
     ACTIONS: 'Actions',
     EXPERIENCE_COUNT: 'Experience',

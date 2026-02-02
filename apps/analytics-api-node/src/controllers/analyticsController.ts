@@ -1,6 +1,12 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { analyticsService } from '../services/analyticsService';
-import { validateLimit, validateMinScore, sanitizeKeyword } from '../utils/validation';
+import {
+  validateLimit,
+  validateMinScore,
+  validatePage,
+  validateSortOrder,
+  sanitizeKeyword,
+} from '../utils/validation';
 
 export async function getDashboard(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -43,14 +49,18 @@ export async function getEducationStats(request: FastifyRequest, reply: FastifyR
 }
 
 export async function getRoleMatches(
-  request: FastifyRequest<{ Querystring: { roleId?: string; minScore?: string } }>,
+  request: FastifyRequest<{
+    Querystring: { roleId?: string; minScore?: string; page?: string; limit?: string };
+  }>,
   reply: FastifyReply
 ) {
   try {
     const roleId = request.query.roleId;
     const minScore = validateMinScore(request.query.minScore, 0);
-    const matches = await analyticsService.getRoleMatches(roleId, minScore);
-    return matches;
+    const page = validatePage(request.query.page, 1);
+    const limit = validateLimit(request.query.limit, 10, 100);
+    const result = await analyticsService.getRoleMatches(roleId, minScore, { page, limit });
+    return result;
   } catch (error: any) {
     return reply.status(500).send({ error: error.message });
   }
@@ -63,6 +73,10 @@ export async function getResumes(
       location?: string;
       minScore?: string;
       roleId?: string;
+      page?: string;
+      limit?: string;
+      sortBy?: string;
+      sortOrder?: string;
     };
   }>,
   reply: FastifyReply
@@ -74,8 +88,12 @@ export async function getResumes(
       minScore: validateMinScore(request.query.minScore, 0),
       roleId: request.query.roleId,
     };
-    const resumes = await analyticsService.getResumes(filters);
-    return resumes;
+    const page = validatePage(request.query.page, 1);
+    const limit = validateLimit(request.query.limit, 10, 100);
+    const sortBy = request.query.sortBy || 'created_at';
+    const sortOrder = validateSortOrder(request.query.sortOrder);
+    const result = await analyticsService.getResumes(filters, { page, limit, sortBy, sortOrder });
+    return result;
   } catch (error: any) {
     return reply.status(500).send({ error: error.message });
   }

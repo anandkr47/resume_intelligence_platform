@@ -1,5 +1,5 @@
 import React from 'react';
-import type { StatCardProps } from '../types';
+import type { StatCardProps } from '../../types';
 
 const variantStyles: Record<
   NonNullable<StatCardProps['variant']>,

@@ -22,12 +22,19 @@ export interface EmptyStateProps {
   action?: ReactNode;
 }
 
-export interface LoadingProps {
-  message?: string;
-}
-
 export interface StatusBadgeProps {
   status: string;
+}
+
+export interface PaginationProps {
+  page: number;
+  totalPages: number;
+  total: number;
+  limit: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange?: (limit: number) => void;
+  pageSizeOptions?: number[];
+  showPageSize?: boolean;
 }
 
 export type StatCardVariant = 'primary' | 'secondary' | 'amber' | 'purple' | 'blue';

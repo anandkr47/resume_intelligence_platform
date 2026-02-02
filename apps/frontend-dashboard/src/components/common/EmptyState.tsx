@@ -1,5 +1,5 @@
 import React from 'react';
-import type { EmptyStateProps } from '../types';
+import type { EmptyStateProps } from '../../types';
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   icon = '📄',

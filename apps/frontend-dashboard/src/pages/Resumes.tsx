@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { useResumes } from '../hooks/useResumes';
 import { useRoles } from '../hooks/useRoles';
-import { Loading } from '../components/Loading';
-import { Card } from '../components/Card';
-import { EmptyState } from '../components/EmptyState';
+import { Card, EmptyState, Pagination } from '../components/common';
 import { ResumeTable } from '../components/ResumeTable';
+import { TableSkeleton } from '../components/skeletons';
 import { ResumeDetailModal } from '../components/ResumeDetailModal';
 import { exportResumesToCSV } from '../utils/csvExport';
 import { resumeService } from '../services/resumeService';
@@ -13,7 +12,19 @@ import type { Resume } from '../types';
 import { COPY } from '../constants';
 
 export const Resumes: React.FC = () => {
-  const { resumes, loading, error, filters, updateFilters, refresh } = useResumes();
+  const {
+    resumes,
+    loading,
+    error,
+    filters,
+    total,
+    totalPages,
+    updateFilters,
+    setPage,
+    setPageSize,
+    setSort,
+    refresh,
+  } = useResumes();
   const roles = useRoles();
   const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
@@ -25,16 +36,25 @@ export const Resumes: React.FC = () => {
   const applyFilters = () => refresh();
 
   const clearFilters = () => {
-    updateFilters({ keyword: '', location: '', minScore: 0, roleId: undefined });
+    updateFilters({
+      keyword: '',
+      location: '',
+      minScore: 0,
+      roleId: undefined,
+      page: 1,
+    });
     setSelectedRoleId('');
     setTimeout(applyFilters, 100);
   };
 
-  const handleExport = () => {
-    exportResumesToCSV(
-      resumes,
-      `resumes_${new Date().toISOString().split('T')[0]}.csv`
-    );
+  const handleExport = async () => {
+    const { analyticsService } = await import('../services/analyticsService');
+    const result = await analyticsService.getResumes({
+      ...filters,
+      limit: 1000,
+      page: 1,
+    });
+    exportResumesToCSV(result.data, `resumes_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const handleDeleteResume = async (resumeId: string) => {
@@ -48,10 +68,6 @@ export const Resumes: React.FC = () => {
       alert(COPY.ERRORS.DELETE_RESUME);
     }
   };
-
-  if (loading && resumes.length === 0) {
-    return <Loading message={COPY.LOADING.RESUMES} />;
-  }
 
   if (error) {
     return (
@@ -77,7 +93,7 @@ export const Resumes: React.FC = () => {
           </h1>
           <p className="text-white/90 text-xl">{COPY.PAGES.RESUMES.SUBTITLE}</p>
         </div>
-        {resumes.length > 0 && (
+        {total > 0 && (
           <button
             className="btn btn-success shadow-lg hover:shadow-xl"
             onClick={handleExport}
@@ -173,15 +189,52 @@ export const Resumes: React.FC = () => {
 
       <Card
         title={COPY.LABELS.RESUME_LIST}
-        description={COPY.LABELS.RESUMES_FOUND(resumes.length)}
+        description={loading && resumes.length === 0 ? 'Loading...' : COPY.LABELS.RESUMES_FOUND(total)}
       >
-        {resumes.length > 0 ? (
-          <ResumeTable
-            resumes={resumes}
-            onRowClick={setSelectedResume}
-            onDelete={handleDeleteResume}
-            getResumeFileUrl={resumeService.getResumeFileUrl}
-          />
+        {loading && resumes.length === 0 ? (
+          <TableSkeleton variant="resumes" rowCount={10} />
+        ) : resumes.length > 0 ? (
+          <>
+            <div className="mb-4 flex flex-wrap gap-2 items-center">
+              <label className="text-sm font-medium text-gray-700">Sort by:</label>
+              <select
+                className="input py-1.5 px-3 text-sm w-40"
+                value={`${filters.sortBy ?? 'created_at'}-${filters.sortOrder ?? 'desc'}`}
+                onChange={(e) => {
+                  const [sortBy, sortOrder] = e.target.value.split('-') as [string, 'asc' | 'desc'];
+                  setSort(sortBy, sortOrder);
+                }}
+              >
+                <option value="created_at-desc">Newest first</option>
+                <option value="created_at-asc">Oldest first</option>
+                <option value="name-asc">Name (A-Z)</option>
+                <option value="name-desc">Name (Z-A)</option>
+                <option value="file_name-asc">File name (A-Z)</option>
+                <option value="file_name-desc">File name (Z-A)</option>
+                <option value="status-asc">Status (A-Z)</option>
+              </select>
+            </div>
+            <div className={`relative transition-opacity duration-200 ${loading ? 'opacity-60' : 'opacity-100'}`}>
+              <ResumeTable
+                resumes={resumes}
+                onRowClick={setSelectedResume}
+                onDelete={handleDeleteResume}
+                getResumeFileUrl={resumeService.getResumeFileUrl}
+              />
+            </div>
+            {totalPages > 1 && (
+              <Pagination
+                page={filters.page ?? 1}
+                totalPages={totalPages}
+                total={total}
+                limit={filters.limit ?? 10}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+                pageSizeOptions={[5, 10, 20, 50]}
+                showPageSize={true}
+              />
+            )}
+          </>
         ) : (
           <EmptyState
             icon="📄"

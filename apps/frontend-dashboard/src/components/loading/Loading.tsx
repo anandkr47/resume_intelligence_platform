@@ -1,7 +1,7 @@
 import React from 'react';
 import { Loader2 } from 'lucide-react';
-import type { LoadingProps } from '../types';
-import { COPY } from '../constants';
+import type { LoadingProps } from '../../types/loading';
+import { COPY } from '../../constants';
 
 export const Loading: React.FC<LoadingProps> = ({
   message = COPY.LOADING.DEFAULT,

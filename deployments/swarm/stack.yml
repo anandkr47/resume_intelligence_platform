@@ -60,6 +60,9 @@ services:
       - "3000:3000"
     environment:
       - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-resume_platform}
       - REDIS_HOST=redis
       - UPLOAD_SERVICE_URL=${UPLOAD_SERVICE_URL:-http://upload-service-node:3001}
       - ANALYTICS_API_URL=${ANALYTICS_API_URL:-http://analytics-api-node:3002}
@@ -91,6 +94,9 @@ services:
       - "3001:3001"
     environment:
       - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-resume_platform}
       - REDIS_HOST=redis
       # Per-replica capacity: DB pool and concurrent upload cap (0 = no limit)
       - DB_POOL_MAX=${DB_POOL_MAX:-20}
@@ -127,6 +133,9 @@ services:
       - "3002:3002"
     environment:
       - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-resume_platform}
     networks:
       - backend
       - frontend
@@ -165,6 +174,9 @@ services:
     environment:
       - REDIS_HOST=redis
       - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-resume_platform}
     networks:
       - backend
     deploy:
@@ -181,6 +193,9 @@ services:
     image: resume-platform/matcher-worker:latest
     environment:
       - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-resume_platform}
       - REDIS_HOST=redis
     networks:
       - backend
@@ -199,6 +214,9 @@ services:
     environment:
       - REDIS_HOST=redis
       - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-resume_platform}
     networks:
       - backend
     deploy:
@@ -215,6 +233,9 @@ services:
     image: resume-platform/export-worker:latest
     environment:
       - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-resume_platform}
       - REDIS_HOST=redis
     volumes:
       - exports_data:/app/exports
@@ -237,7 +258,7 @@ services:
     networks:
       - frontend
     environment:
-      - API_GATEWAY_URL=${API_GATEWAY_URL}
+      - API_GATEWAY_URL=${API_GATEWAY_URL:-http://api-gateway-node:3000}
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/"]
       interval: 30s
@@ -259,4 +280,8 @@ volumes:
 
 networks:
   backend:
+    driver: overlay
+    attachable: true   # allow docker run --network ... for init-db-swarm.sh
   frontend:
+    driver: overlay
+    attachable: true

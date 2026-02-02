@@ -1,5 +1,5 @@
 import React from 'react';
-import type { StatusBadgeProps } from '../types';
+import type { StatusBadgeProps } from '../../types';
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const getStatusClass = (s: string) => {

@@ -1,6 +1,5 @@
 import React from 'react';
-import { StatusBadge } from './StatusBadge';
-import { EmptyState } from './EmptyState';
+import { StatusBadge, EmptyState } from './common';
 import { formatDate } from '../utils/formatters';
 import { Eye, Trash2, Download } from 'lucide-react';
 import type { ResumeTableProps } from '../types';

@@ -12,15 +12,10 @@ export function useRoles(): RoleOption[] {
   useEffect(() => {
     let cancelled = false;
     analyticsService
-      .getRoleMatches()
-      .then((matches: { role_id?: string; role_title?: string }[]) => {
+      .getRoleMatches(undefined, 0, 1, 1)
+      .then((res) => {
         if (cancelled) return;
-        const unique: RoleOption[] = Array.from(
-          new Map(matches.map((m) => [m.role_id, m.role_title])).entries()
-        )
-          .filter(([id]) => id != null && id !== '')
-          .map(([id, title]) => ({ id: id as string, title: title ?? '' }));
-        setRoles(unique);
+        setRoles(res.uniqueRoles ?? []);
       })
       .catch((err) => console.error('Failed to load roles:', err));
     return () => {
