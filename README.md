@@ -27,7 +27,6 @@ Resume processing job flow (upload → OCR → parser → matcher → dashboard 
 
 - **[Architecture](docs/architecture/README.md)** — Components, data flow, queues, deployment
 - **[Runbooks](docs/runbooks/README.md)** — Operations, incident response, troubleshooting
-- **[Screenshots](docs/screenshots/README.md)** — UI screenshots by screen
 
 ---
 
