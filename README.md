@@ -220,6 +220,19 @@ Health: `curl http://localhost:3000/health`
 
 ---
 
+## Commit conventions
+
+The repo uses **Husky**, **lint-staged**, and **Commitlint** with [Conventional Commits](https://www.conventionalcommits.org/):
+
+- **pre-commit:** Runs **lint-staged** — ESLint (fix) and Prettier on staged `.ts`, `.tsx`, `.js`, `.json`, `.md`, `.yml` files.
+- **commit-msg:** Runs **Commitlint** — enforces conventional commit format.
+
+**Commit format:** `type(scope?): subject` (e.g. `feat(upload): add batch upload`, `fix(parser): handle empty PDF`). Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Header max 100 characters.
+
+After `pnpm install`, the `prepare` script installs Husky hooks automatically.
+
+---
+
 ## Database and data
 
 - **Migrations:** `./scripts/migrate-db.sh`
