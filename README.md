@@ -1,6 +1,6 @@
 # Resume Intelligence Platform
 
-An automated, scalable resume parsing and analytics platform that processes resumes, extracts key information, matches candidates to job roles, and provides actionable insights.
+An automated, scalable resume parsing and analytics platform that processes resumes, extracts key information, matches candidates to job roles, and provides actionable insights on it.
 
 ## Features
 
