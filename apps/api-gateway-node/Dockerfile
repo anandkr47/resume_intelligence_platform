@@ -4,6 +4,9 @@ FROM node:18-alpine AS base
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@8.15.0 --activate
 
+# Skip Husky in Docker (root prepare script runs husky; not needed in containers)
+ENV HUSKY=0
+
 # Builder stage
 FROM base AS builder
 

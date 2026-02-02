@@ -1,6 +1,25 @@
 import { config } from '@resume-platform/config';
 import type { GatewayRouteConfig } from '../types';
 
+/** Helmet security options (industry-standard HTTP headers). */
+export const helmetConfig = {
+  contentSecurityPolicy: false, // API gateway proxies; CSP applied at frontend if needed
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: 'same-site' as const },
+  crossOriginOpenerPolicy: { policy: 'same-origin' as const },
+  dnsPrefetchControl: { allow: false },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+  ieNoOpen: true,
+  noSniff: true,
+  originAgentCluster: true,
+  permittedCrossDomainPolicies: { permittedPolicies: 'none' as const },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' as const },
+};
+
 /** All backend services expose APIs under /api/v1; gateway rewrites client paths to these. */
 export const gatewayRoutes: Record<string, GatewayRouteConfig> = {
   upload: {
