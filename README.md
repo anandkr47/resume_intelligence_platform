@@ -198,6 +198,8 @@ pnpm run swarm:stop
 
 ## Access
 
+**Application (microservices stack):**
+
 | Service        | URL                                                |
 | -------------- | -------------------------------------------------- |
 | Frontend       | http://localhost:80 (Compose) or :8080 (local dev) |
@@ -207,28 +209,56 @@ pnpm run swarm:stop
 | PostgreSQL     | localhost:5432                                     |
 | Redis          | localhost:6379                                     |
 
+**Monitoring (only when using `docker:start:full` or after `infra:start`):**
+
+| Service      | URL                                 |
+| ------------ | ----------------------------------- |
+| Prometheus   | http://localhost:9090               |
+| Grafana      | http://localhost:3030 (admin/admin) |
+| Alertmanager | http://localhost:9093               |
+
 Health: `curl http://localhost:3000/health`
+
+---
+
+## Start scripts compared
+
+| Script                                                         | What it does                                                                                                                                                                      |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`pnpm run docker:start`**                                    | Start microservices with **existing** images (no build). Uses `start-all-services.sh`.                                                                                            |
+| **`pnpm run docker:start:build`**                              | **Build** images, then start **microservices only** (gateway, upload, analytics, workers, frontend, Postgres, Redis). No Prometheus/Grafana.                                      |
+| **`pnpm run docker:start:full`**                               | **Build** images, start **microservices**, then start **monitoring stack** (Prometheus, Grafana, Loki, Promtail, Alertmanager). Use this to get Grafana at http://localhost:3030. |
+| **`pnpm run docker:microservices`**                            | Start microservices with existing images (Compose only, no script).                                                                                                               |
+| **`pnpm run swarm:deploy`** / **`pnpm run swarm:start:build`** | Deploy the **same apps** as **Docker Swarm** (production-style, replicas, single published port). No monitoring stack unless you add it separately.                               |
+| **`pnpm run swarm:start`**                                     | Deploy Swarm stack **without** rebuilding images.                                                                                                                                 |
+
+**Summary:** Use **`docker:start:build`** for app-only; use **`docker:start:full`** for app + Grafana/Prometheus; use **Swarm** scripts for production-style scaling.
 
 ---
 
 ## Scripts (root)
 
-| Script                      | Description                                |
-| --------------------------- | ------------------------------------------ |
-| `pnpm build`                | Build all packages/apps                    |
-| `pnpm dev`                  | Run all apps in dev                        |
-| `pnpm lint`                 | Lint                                       |
-| `pnpm type-check`           | TypeScript check                           |
-| `pnpm docker:dev`           | Start dev Compose (e.g. DB, Redis)         |
-| `pnpm docker:microservices` | Start full microservices stack             |
-| `pnpm docker:start`         | Start via start-all-services.sh            |
-| `pnpm docker:start:build`   | Build and start                            |
-| `pnpm docker:down`          | Stop Compose stack                         |
-| `pnpm docker:logs`          | Follow logs                                |
-| `pnpm seed:jobs`            | Seed job roles (bash scripts/seed-jobs.sh) |
-| `pnpm swarm:deploy`         | Deploy Swarm stack                         |
-| `pnpm swarm:stop`           | Remove Swarm stack                         |
-| `pnpm load-test`            | Run k6 upload test                         |
+| Script                      | Description                                        |
+| --------------------------- | -------------------------------------------------- |
+| `pnpm build`                | Build all packages/apps                            |
+| `pnpm dev`                  | Run all apps in dev                                |
+| `pnpm lint`                 | Lint                                               |
+| `pnpm type-check`           | TypeScript check                                   |
+| `pnpm docker:dev`           | Start dev Compose (Postgres, Redis only)           |
+| `pnpm docker:microservices` | Start microservices stack (existing images)        |
+| `pnpm docker:start`         | Start microservices (no build) via script          |
+| `pnpm docker:start:build`   | Build images + start microservices only            |
+| `pnpm docker:start:full`    | Build + microservices + monitoring (Grafana, etc.) |
+| `pnpm docker:down`          | Stop Compose stack                                 |
+| `pnpm docker:logs`          | Follow logs                                        |
+| `pnpm infra:start`          | Start monitoring stack (run after microservices)   |
+| `pnpm infra:stop`           | Stop monitoring stack                              |
+| `pnpm seed:jobs`            | Seed job roles (bash scripts/seed-jobs.sh)         |
+| `pnpm swarm:deploy`         | Deploy Swarm stack                                 |
+| `pnpm swarm:start`          | Deploy Swarm (no rebuild)                          |
+| `pnpm swarm:start:build`    | Build + deploy Swarm                               |
+| `pnpm swarm:stop`           | Remove Swarm stack                                 |
+| `pnpm load-test`            | Run k6 upload test                                 |
 
 ---
 
