@@ -17,7 +17,12 @@ An automated, scalable resume parsing and analytics platform that processes resu
 
 High-level architecture of the Resume Intelligence Platform:
 
-![Resume Intelligence System Design](docs/system-design/Resume_Inteligence_System_Design.png)
+![Resume Intelligence Platform System Design](docs/system-design/Resume_Inteligence_Platform_System_Design.png)
+
+**Detailed documentation:**
+
+- **[Architecture](docs/architecture/README.md)** — Components, data flow, queues, deployment
+- **[Runbooks](docs/runbooks/README.md)** — Operations, incident response, troubleshooting
 
 ---
 
@@ -66,7 +71,9 @@ resume-intelligence-platform/
 │   ├── monitoring/               # Prometheus, Grafana, Alertmanager
 │   └── postgres/                 # Init SQL and migrations
 ├── docs/                         # Documentation
-│   └── system-design/            # System design diagrams
+│   ├── architecture/             # Architecture (components, data flow, queues)
+│   ├── runbooks/                 # Operations, incident response, troubleshooting
+│   └── system-design/            # System design + processing flow diagrams
 ├── scripts/                      # Build, deploy, seed, migrate, stop-swarm
 ├── load-testing/                 # k6 configs
 ├── package.json                  # Root scripts, turbo
