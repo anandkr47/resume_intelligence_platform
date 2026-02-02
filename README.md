@@ -32,16 +32,28 @@ Resume processing job flow (upload → OCR → parser → matcher → dashboard 
 
 ## Tech Stack
 
-| Layer        | Technology                          |
-|-------------|--------------------------------------|
-| Frontend    | React, TypeScript, Vite, Tailwind, ApexCharts |
-| API         | Node.js, TypeScript, Fastify        |
-| Queue       | BullMQ (Redis)                       |
-| OCR         | Tesseract (Python)                   |
-| Parser/NLP  | Python (SpaCy) / Node.js             |
-| Database    | PostgreSQL                           |
-| Monorepo    | Turborepo, pnpm                      |
-| Deployment  | Docker, Docker Compose, Docker Swarm |
+| Layer      | Technology                                    |
+| ---------- | --------------------------------------------- |
+| Frontend   | React, TypeScript, Vite, Tailwind, ApexCharts |
+| API        | Node.js, TypeScript, Fastify                  |
+| Queue      | BullMQ (Redis)                                |
+| OCR        | Tesseract (Python)                            |
+| Parser/NLP | Python (SpaCy) / Node.js                      |
+| Database   | PostgreSQL                                    |
+| Monorepo   | Turborepo, pnpm                               |
+| Deployment | Docker, Docker Compose, Docker Swarm          |
+
+---
+
+## Security (API servers)
+
+All Node.js APIs (API Gateway, Upload Service, Analytics API) use industry-standard security:
+
+- **Helmet** — HTTP security headers: HSTS, X-Content-Type-Options (noSniff), X-Frame-Options, Referrer-Policy, Cross-Origin-Resource-Policy, permitted cross-domain policies, etc.
+- **Rate limiting** — Per-IP limits (configurable via `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW`). Gateway default: 10000/15min; Upload: 500/15min; Analytics: 1000/15min.
+- **CORS** — Allowed methods and headers restricted; credentials supported where needed.
+
+Tune limits per environment (e.g. higher for load tests, lower for public APIs).
 
 ---
 
@@ -186,14 +198,14 @@ pnpm run swarm:stop
 
 ## Access
 
-| Service        | URL                    |
-|----------------|------------------------|
+| Service        | URL                                                |
+| -------------- | -------------------------------------------------- |
 | Frontend       | http://localhost:80 (Compose) or :8080 (local dev) |
-| API Gateway    | http://localhost:3000  |
-| Upload Service | http://localhost:3001  |
-| Analytics API  | http://localhost:3002  |
-| PostgreSQL     | localhost:5432         |
-| Redis          | localhost:6379         |
+| API Gateway    | http://localhost:3000                              |
+| Upload Service | http://localhost:3001                              |
+| Analytics API  | http://localhost:3002                              |
+| PostgreSQL     | localhost:5432                                     |
+| Redis          | localhost:6379                                     |
 
 Health: `curl http://localhost:3000/health`
 
@@ -201,22 +213,22 @@ Health: `curl http://localhost:3000/health`
 
 ## Scripts (root)
 
-| Script              | Description                    |
-|---------------------|--------------------------------|
-| `pnpm build`        | Build all packages/apps        |
-| `pnpm dev`          | Run all apps in dev            |
-| `pnpm lint`         | Lint                           |
-| `pnpm type-check`   | TypeScript check               |
-| `pnpm docker:dev`   | Start dev Compose (e.g. DB, Redis) |
-| `pnpm docker:microservices` | Start full microservices stack |
-| `pnpm docker:start` | Start via start-all-services.sh |
-| `pnpm docker:start:build` | Build and start            |
-| `pnpm docker:down`  | Stop Compose stack             |
-| `pnpm docker:logs`  | Follow logs                    |
-| `pnpm seed:jobs`    | Seed job roles (bash scripts/seed-jobs.sh) |
-| `pnpm swarm:deploy` | Deploy Swarm stack             |
-| `pnpm swarm:stop`   | Remove Swarm stack             |
-| `pnpm load-test`    | Run k6 upload test             |
+| Script                      | Description                                |
+| --------------------------- | ------------------------------------------ |
+| `pnpm build`                | Build all packages/apps                    |
+| `pnpm dev`                  | Run all apps in dev                        |
+| `pnpm lint`                 | Lint                                       |
+| `pnpm type-check`           | TypeScript check                           |
+| `pnpm docker:dev`           | Start dev Compose (e.g. DB, Redis)         |
+| `pnpm docker:microservices` | Start full microservices stack             |
+| `pnpm docker:start`         | Start via start-all-services.sh            |
+| `pnpm docker:start:build`   | Build and start                            |
+| `pnpm docker:down`          | Stop Compose stack                         |
+| `pnpm docker:logs`          | Follow logs                                |
+| `pnpm seed:jobs`            | Seed job roles (bash scripts/seed-jobs.sh) |
+| `pnpm swarm:deploy`         | Deploy Swarm stack                         |
+| `pnpm swarm:stop`           | Remove Swarm stack                         |
+| `pnpm load-test`            | Run k6 upload test                         |
 
 ---
 
